@@ -1,0 +1,243 @@
+/* =========================================
+   MUET HUB - MINIMALIST SAAS THEME
+   ========================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
+/* 1. Global Reset */
+*, *::before, *::after { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+}
+
+/* 2. Body - Crisp, light background */
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #f8fafc; /* Very light cool gray */
+    color: #0f172a; /* Near black for high readability */
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding-bottom: 60px;
+}
+
+/* 3. The Clean Navigation Bar */
+#nav-placeholder {
+    width: 100%;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 40px;
+}
+
+.navbar {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px 20px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.navbar a {
+    color: #64748b; 
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.navbar a:hover {
+    color: #0f172a;
+    background-color: #f1f5f9;
+}
+
+.navbar a.active {
+    color: #2563eb; /* Sharp, professional blue */
+    background-color: #eff6ff; 
+}
+
+/* 4. The Main App Container */
+.app-container {
+    background-color: #ffffff;
+    width: 90%;
+    max-width: 1200px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 40px;
+    /* Very subtle shadow just to lift it off the background */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+}
+
+h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 8px;
+    text-align: center;
+    letter-spacing: -0.5px;
+}
+
+p {
+    color: #64748b;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 15px;
+}
+
+/* 5. Content Boxes (Prompts & Reading) */
+.prompt-box, .upload-box, .passage-box, .question-block {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 24px;
+    font-size: 15px;
+    color: #334155;
+}
+
+/* Give the prompt a small blue accent bar */
+.prompt-box {
+    border-left: 4px solid #2563eb;
+}
+
+/* 6. Inputs & Forms */
+textarea {
+    width: 100%;
+    height: 250px;
+    padding: 16px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 15px;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+textarea:focus {
+    border-color: #2563eb;
+    /* A crisp blue outline when typing */
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* 7. Buttons */
+.btn-submit, .btn-download {
+    display: block;
+    width: 100%;
+    background-color: #0f172a; /* Dark sleek button */
+    color: #ffffff;
+    border: none;
+    padding: 14px;
+    margin-top: 10px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    text-align: center;
+    text-decoration: none;
+}
+
+.btn-submit:hover {
+    background-color: #334155;
+}
+
+.btn-submit:disabled {
+    background-color: #cbd5e1;
+    color: #64748b;
+    cursor: not-allowed;
+}
+
+/* 8. Utility Classes & Results */
+.word-counter {
+    text-align: right;
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 6px;
+    font-weight: 500;
+}
+
+.word-counter.error { color: #ef4444; }
+
+#results-box {
+    display: none; /* Keep this for your JS to toggle */
+    margin-top: 24px;
+    padding: 24px;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    
+    /* THE FIXES */
+    text-align: left !important; 
+    width: 100%; /* Ensures the box takes up the full width available */
+    box-sizing: border-box; /* Prevents padding from breaking the width */
+}
+
+#results-box p, 
+#results-box h3, 
+#results-box span {
+    text-align: left !important;
+    display: block; /* Ensures they act like full-width rows */
+    margin-left: 0;
+    margin-right: auto;
+}
+
+#results-box strong {
+    display: inline-block;
+    min-width: 120px; /* Aligns the colons (:) vertically */
+}
+
+.band-score { 
+    font-size: 24px; 
+    font-weight: 700; 
+    color: #16a34a; /* Crisp green */
+    margin-bottom: 12px; 
+}
+
+#bandDisplay {
+    background: #eff6ff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid #bfdbfe;
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+/* 9. Resource Page File Cards */
+.file-card {
+    text-align: left;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 16px 20px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    transition: border-color 0.2s ease;
+}
+
+.file-card:hover {
+    border-color: #cbd5e1;
+}
+
+/* Make the download button on the resource page less heavy */
+.file-card .btn-download {
+    width: auto;
+    margin-top: 0;
+    padding: 8px 16px;
+    background-color: #f1f5f9;
+    color: #0f172a;
+    border: 1px solid #e2e8f0;
+}
+
+.file-card .btn-download:hover {
+    background-color: #e2e8f0;
+}

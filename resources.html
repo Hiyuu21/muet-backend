@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MUET Hub - Past Year Resources</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .file-card {
+            background: #fdfefe;
+            border: 1px solid #d5dbdb;
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .file-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .btn-download {
+            background-color: #27ae60;
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        .btn-download:hover {
+            background-color: #2ecc71;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="nav-placeholder"></div>
+    <script src="js/navbar.js"></script>
+
+   <div class="app-container">
+        <h1>Past Year Resources</h1>
+        <p>Download and review past MUET papers and materials.</p>
+
+        <div id="fileList">
+            <em>Loading resources from the cloud...</em>
+        </div>
+    </div>
+
+    <script src="js/navbar.js"></script>
+    <script>
+        async function fetchResources() {
+            try {
+                // Fetch from the new MongoDB endpoint!
+                const response = await fetch('http://localhost:3000/all-resources');
+                const files = await response.json();
+                
+                const fileListContainer = document.getElementById('fileList');
+                fileListContainer.innerHTML = ''; // Clear loading text
+
+                if (files.length === 0) {
+                    fileListContainer.innerHTML = '<p style="text-align:center;">No resources uploaded yet!</p>';
+                    return;
+                }
+
+                // Loop through the database and draw a card for each file
+                files.forEach(file => {
+                    const fileCard = document.createElement('div');
+                    fileCard.className = 'file-card';
+                    fileCard.innerHTML = `
+                        <span style="font-weight: 500;">📂 ${file.originalName}</span>
+                        <a href="http://localhost:3000/uploads/${file.fileName}" target="_blank" class="btn-download">View / Download</a>
+                    `;
+                    fileListContainer.appendChild(fileCard);
+                });
+
+            } catch (error) {
+                console.error('Error fetching files:', error);
+                document.getElementById('fileList').innerHTML = '<p style="color:red;">Failed to load resources.</p>';
+            }
+        }
+
+        // Run the fetch function as soon as the page loads
+        fetchResources();
+    </script>
+    </script>
+</body>
+</html>

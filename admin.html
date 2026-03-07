@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MUET Hub - Resource Upload</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .upload-box {
+            background: #f1f8fd;
+            padding: 30px;
+            text-align: center;
+            border: 2px dashed #000000;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        input[type="file"] {
+            margin: 20px 0;
+            font-family: 'Montserrat', sans-serif;
+        }
+        #statusMessage {
+            margin-top: 15px;
+            font-weight: bold;
+            color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="nav-placeholder"></div>
+    <script src="js/navbar.js"></script>
+
+    <div class="app-container">
+        <h1>Control Panel</h1>
+        <p>Upload new MUET Past Year questions (PDF or DOCX) to the server here.</p>
+
+        <div class="upload-box">
+            <h3>Upload Resource</h3>
+            
+            <select id="fileTypeSelect" style="width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #cbd5e1; font-family: 'Montserrat', sans-serif;">
+                <option value="reading">📖 Reading Practice (AI Extract)</option>
+                <option value="writing">✍️ Writing Task 2 (AI Extract)</option>
+                <option value="general">📂 General Resource (PDF/Audio/Notes)</option>
+            </select>
+
+            <input type="file" id="fileInput" style="margin-bottom: 15px;">
+            <button class="btn-submit" onclick="uploadFile()">Upload & Process</button>
+            <div id="progressContainer" style="display: none; width: 100%; background-color: #e2e8f0; border-radius: 8px; margin-top: 15px; overflow: hidden; height: 10px;">
+                <div id="progressBar" style="width: 0%; height: 100%; background-color: #2563eb; transition: width 0.3s ease;"></div>
+            </div>
+            
+            <p id="uploadStatus" style="margin-top: 15px; font-weight: 600; font-size: 14px;"></p>
+            <p id="uploadStatus" style="margin-top: 15px; font-weight: 600;"></p>
+        </div>
+            <button onclick="syncFiles()" style="font-family: 'Montserrat', sans-serif; background-color: #000000; color: white; padding: 10px; border-radius: 10px;">
+                🔄 Sync Folder (Use for files > 100MB)
+            </button>
+
+            <script>
+            async function syncFiles() {
+                const status = document.getElementById('uploadStatus');
+                status.innerText = "Scanning uploads folder...";
+                
+                const response = await fetch('http://localhost:3000/sync-resources', { method: 'POST' });
+                const result = await response.json();
+                
+                status.innerText = result.message;
+                status.style.color = "#16a34a";
+                // Optional: Refresh your list if you have a loadResources() function
+                if(typeof loadResources === "function") loadResources();
+            }
+            </script>
+    </div>
+
+    <script>
+        function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const fileType = document.getElementById('fileTypeSelect').value;
+            const statusText = document.getElementById('uploadStatus');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+
+            if (fileInput.files.length === 0) {
+                statusText.innerText = "Please select a file first!";
+                statusText.style.color = "#ef4444";
+                return;
+            }
+
+            // Reset UI for new upload
+            statusText.innerText = "Uploading file to server...";
+            statusText.style.color = "#64748b";
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+
+            const formData = new FormData();
+            formData.append('resourceFile', fileInput.files[0]);
+            formData.append('fileType', fileType);
+
+            // Use XHR to track progress
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'http://localhost:3000/upload', true);
+
+            // Add this to prevent the browser from hanging up
+            xhr.timeout = 0; // 0 means NO TIMEOUT
+            
+            // This is critical for large files
+            xhr.setRequestHeader("Connection", "keep-alive");
+
+            // Track the upload progress
+            xhr.upload.onprogress = function(event) {
+                if (event.lengthComputable) {
+                    const percentComplete = Math.round((event.loaded / event.total) * 100);
+                    progressBar.style.width = percentComplete + '%';
+                    
+                    if (percentComplete === 100) {
+                        statusText.innerText = "File uploaded! AI is processing... this may take up to 30 seconds.";
+                        statusText.style.color = "#2563eb";
+                        // Make the bar pulse to show it's thinking
+                        progressBar.style.animation = "pulse 1.5s infinite"; 
+                    }
+                }
+            };
+
+            // Handle the final response from the server
+            xhr.onload = function() {
+                progressBar.style.animation = "none"; // Stop pulsing
+                if (xhr.status === 200) {
+                    const result = JSON.parse(xhr.responseText);
+                    statusText.innerText = result.message;
+                    statusText.style.color = "#16a34a";
+                } else {
+                    statusText.innerText = "Upload failed. Check the server console.";
+                    statusText.style.color = "#ef4444";
+                    progressBar.style.backgroundColor = "#ef4444"; // Turn bar red
+                }
+            };
+
+            xhr.send(formData);
+        }
+    </script>
+</body>
+</html>
