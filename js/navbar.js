@@ -4,9 +4,9 @@ function loadNavbar() {
     // 1. The unified HTML for your navigation bar
     const navbarHTML = `
         <nav class="navbar">
-            <a href="index.html" id="link-index">✍️ Writing Grader</a>
+            <a href="index.html" id="link-index">✍️ Writing Practice</a>
             <a href="reading.html" id="link-reading">📖 Reading Practice</a>
-            <a href="resources.html" id="link-resources">📂 Past Year Resources</a>
+            <a href="resources.html" id="link-resources">📂 Notes & Resources</a>
             <a href="admin.html" id="link-admin">⚙️ Resource Upload</a>
         </nav>
     `;

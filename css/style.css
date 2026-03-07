@@ -241,3 +241,22 @@ textarea:focus {
 .file-card .btn-download:hover {
     background-color: #e2e8f0;
 }
+
+.logo-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    gap: 10px; /* Space between the logo and the text */
+}
+
+.nav-logo {
+    height: 40px; /* Adjust this number until it fits perfectly */
+    width: auto;
+}
+
+.logo-text {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+    color: #1e293b;
+}
