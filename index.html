@@ -19,7 +19,7 @@
         async function loadWritingPrompt() {
             try {
                 // Fetch ALL writing tasks
-                const response = await fetch('http://localhost:3000/all-writing'); // We'll create this endpoint next
+                const response = await fetch('https://muet-hub-api.onrender.com/all-writing'); // We'll create this endpoint next
                 writingTasks = await response.json();
                 
                 if (writingTasks.length > 1) {

@@ -37,7 +37,7 @@ async function gradeEssay() {
     submitBtn.disabled = true;
 
     try {
-        const response = await fetch('http://localhost:3000/grade-writing', {
+        const response = await fetch('https://muet-hub-api.onrender.com/grade-writing', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

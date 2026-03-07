@@ -61,7 +61,7 @@
         async function fetchResources() {
             try {
                 // Fetch from the new MongoDB endpoint!
-                const response = await fetch('http://localhost:3000/all-resources');
+                const response = await fetch('https://muet-hub-api.onrender.com/all-resources');
                 const files = await response.json();
                 
                 const fileListContainer = document.getElementById('fileList');
@@ -78,7 +78,7 @@
                     fileCard.className = 'file-card';
                     fileCard.innerHTML = `
                         <span style="font-weight: 500;">📂 ${file.originalName}</span>
-                        <a href="http://localhost:3000/uploads/${file.fileName}" target="_blank" class="btn-download">View / Download</a>
+                        <a href="https://muet-hub-api.onrender.com/uploads/${file.fileName}" target="_blank" class="btn-download">View / Download</a>
                     `;
                     fileListContainer.appendChild(fileCard);
                 });

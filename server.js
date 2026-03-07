@@ -15,8 +15,14 @@ dns.setServers(['8.8.8.8', '1.1.1.1']);
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY; 
 const MONGO_URI = process.env.MONGO_URI;
 
-app.use(cors());
-app.use(express.json()); 
+app.use(cors({
+    origin: [
+        'https://tubular-unicorn-b6a4fe.netlify.app', // Your live Netlify site
+        'http://localhost:3000' // Keeps your local testing working
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
+}));app.use(express.json()); 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // --- NEW: Connect to MongoDB and Define the Schema ---

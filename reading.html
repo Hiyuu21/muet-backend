@@ -93,7 +93,7 @@
 
         async function loadDynamicQuizzes() {
             try {
-                const response = await fetch('http://localhost:3000/all-quizzes');
+                const response = await fetch('https://muet-hub-api.onrender.com/all-quizzes');
                 if (!response.ok) throw new Error("No quizzes found.");
                 
                 allQuizzes = await response.json();

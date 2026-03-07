@@ -62,7 +62,7 @@
                 const status = document.getElementById('uploadStatus');
                 status.innerText = "Scanning uploads folder...";
                 
-                const response = await fetch('http://localhost:3000/sync-resources', { method: 'POST' });
+                const response = await fetch('https://muet-hub-api.onrender.com/sync-resources', { method: 'POST' });
                 const result = await response.json();
                 
                 status.innerText = result.message;
@@ -99,7 +99,7 @@
 
             // Use XHR to track progress
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', 'http://localhost:3000/upload', true);
+            xhr.open('POST', 'https://muet-hub-api.onrender.com/upload', true);
 
             // Add this to prevent the browser from hanging up
             xhr.timeout = 0; // 0 means NO TIMEOUT
