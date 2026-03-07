@@ -53,6 +53,11 @@ const resourceSchema = new mongoose.Schema({
 });
 const Resource = mongoose.model('Resource', resourceSchema);
 
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 // --- Multer Storage Setup (You need this back!) ---
 const storage = multer.diskStorage({
     destination: function (req, file, cb) { 
