@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MUET Writing Auto-Grader</title>
+    <link rel="icon" type="image/png" href="images/logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+   <div id="nav-placeholder"></div>
+    <script src="js/navbar.js"></script>
+    <script>
+        let writingTasks = [];
+        let currentTaskIndex = 0;
+
+        async function loadWritingPrompt() {
+            try {
+                // Fetch ALL writing tasks
+                const response = await fetch('https://muet-hub-api.onrender.com/all-writing'); // We'll create this endpoint next
+                writingTasks = await response.json();
+                
+                if (writingTasks.length > 1) {
+                    document.getElementById('switchBtn').style.display = 'block';
+                }
+                renderTask();
+            } catch (error) {
+                document.getElementById('dynamicPrompt').innerText = "No prompts found.";
+            }
+        }
+
+        function renderTask() {
+            const task = writingTasks[currentTaskIndex];
+            document.getElementById('taskTitle').innerText = `Writing ${task.type || 'Task'}:`;
+            document.getElementById('dynamicPrompt').innerText = task.prompt;
+        }
+
+        function toggleTask() {
+            currentTaskIndex = (currentTaskIndex + 1) % writingTasks.length; // Loops back to start
+            renderTask();
+        }
+
+        // Run as soon as the page loads
+        loadWritingPrompt();
+    </script>
+
+    <div class="app-container">
+    <h1>MUET Auto-Grader Hub</h1>
+    
+    <div class="prompt-box" style="text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <strong id="taskTitle">Writing Task:</strong>
+                <button onclick="toggleTask()" id="switchBtn" style="font-family: 'Montserrat', sans-serif;padding: 5px 10px; font-size: 12px; cursor: pointer; border-radius: 5px; border: 1px solid #ccc; background: #f8fafc; display: none;">Next Task 🔄</button>
+            </div>
+            <p id="dynamicPrompt" style="margin-bottom: 0; margin-top: 8px; text-align: left; line-height: 1.5;">Loading prompts...</p>
+        </div>
+
+        <textarea id="essayInput" placeholder="Start typing..." oninput="updateWordCount()"></textarea>
+        
+        <div id="wordCountDisplay" class="word-counter" style="color: #64748b;">0 words</div>
+        
+        <button id="submitBtn" class="btn-submit" onclick="gradeEssay()">Grade My Essay</button>
+
+        <div id="results-box" style="display: none;">
+            <div class="band-score" id="bandDisplay"></div>
+            <h3>Feedback:</h3>
+            <p><strong>Strengths:</strong> <span id="strengthsDisplay"></span></p>
+            <p><strong>Areas to Improve:</strong> <span id="weaknessesDisplay"></span></p>
+            <p><strong>Vocabulary Upgrade:</strong> <span id="vocabDisplay"></span></p>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+</body>
+
+    <footer>
+        <p>&copy; 2026 MUET Hub - Built with ❤️ for MUET Candidates</p>
+    </footer>
+
+</html>

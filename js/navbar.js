@@ -4,10 +4,18 @@ function loadNavbar() {
     // 1. The unified HTML for your navigation bar
     const navbarHTML = `
         <nav class="navbar">
-            <a href="index.html" id="link-index">✍️ Writing Practice</a>
-            <a href="reading.html" id="link-reading">📖 Reading Practice</a>
-            <a href="resources.html" id="link-resources">📂 Notes & Resources</a>
-            <a href="admin.html" id="link-admin">⚙️ Resource Upload</a>
+            <a href="index.html" class="logo-container">
+                <img src="images/logo.png" alt="MUET Hub Logo" class="nav-logo">
+                <span class="logo-text">MUET Hub</span>
+            </a>
+            
+            <div class="nav-links">
+                <a href="index.html" id="link-index">🏠 Homepage</a>
+                <a href="writing.html" id="link-writing">✍️ Writing Practice</a>
+                <a href="reading.html" id="link-reading">📖 Reading Practice</a>
+                <a href="resources.html" id="link-resources">📂 Notes & Resources</a>
+                <a href="admin.html" id="link-admin">⚙️ Resource Upload</a>
+            </div>
         </nav>
     `;
 
@@ -18,15 +26,12 @@ function loadNavbar() {
     }
 
     // 3. Highlight the active tab
-    // Get the current file name from the URL (e.g., "reading.html")
     let currentPath = window.location.pathname.split("/").pop();
     
-    // If it's empty (like just "localhost:3000/"), default to index
     if (currentPath === "") {
         currentPath = "index.html";
     }
 
-    // Find the link that matches the current path and add the 'active' class
     const activeLinkId = `link-${currentPath.replace('.html', '')}`;
     const activeLinkElement = document.getElementById(activeLinkId);
     

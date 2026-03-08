@@ -1,21 +1,15 @@
-/* =========================================
-   MUET HUB - MINIMALIST SAAS THEME
-   ========================================= */
-
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
 
-/* 1. Global Reset */
 *, *::before, *::after { 
     box-sizing: border-box; 
     margin: 0; 
     padding: 0; 
 }
 
-/* 2. Body - Crisp, light background */
 body {
     font-family: 'Montserrat', sans-serif;
-    background-color: #f8fafc; /* Very light cool gray */
-    color: #0f172a; /* Near black for high readability */
+    background-color: #ebf3fa; 
+    color: #000000; 
     line-height: 1.6;
     display: flex;
     flex-direction: column;
@@ -24,7 +18,6 @@ body {
     padding-bottom: 60px;
 }
 
-/* 3. The Clean Navigation Bar */
 #nav-placeholder {
     width: 100%;
     background-color: #ffffff;
@@ -34,11 +27,36 @@ body {
 
 .navbar {
     display: flex;
-    justify-content: center;
-    gap: 10px;
-    padding: 15px 20px;
-    max-width: 900px;
-    margin: 0 auto;
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 15px 30px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none; 
+}
+
+.nav-logo {
+    height: 40px; 
+    width: auto;
+}
+
+.logo-text {
+    font-size: 22px;
+    font-weight: 700;
+    color: #2f6cce;
+    font-family: 'Montserrat', sans-serif; 
+}
+
+.nav-links {
+    display: flex;
+    gap: 20px;
 }
 
 .navbar a {
@@ -57,11 +75,10 @@ body {
 }
 
 .navbar a.active {
-    color: #2563eb; /* Sharp, professional blue */
+    color: #2563eb; 
     background-color: #eff6ff; 
 }
 
-/* 4. The Main App Container */
 .app-container {
     background-color: #ffffff;
     width: 90%;
@@ -69,8 +86,12 @@ body {
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     padding: 40px;
-    /* Very subtle shadow just to lift it off the background */
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+}
+
+.app-container h1, 
+.app-container p {
+    text-align: left;
 }
 
 h1 {
@@ -78,18 +99,17 @@ h1 {
     font-weight: 700;
     color: #0f172a;
     margin-bottom: 8px;
-    text-align: center;
+    text-align: left; 
     letter-spacing: -0.5px;
 }
 
 p {
     color: #64748b;
-    text-align: center;
+    text-align: left; 
     margin-bottom: 30px;
     font-size: 15px;
 }
 
-/* 5. Content Boxes (Prompts & Reading) */
 .prompt-box, .upload-box, .passage-box, .question-block {
     background-color: #f8fafc;
     border: 1px solid #e2e8f0;
@@ -100,12 +120,10 @@ p {
     color: #334155;
 }
 
-/* Give the prompt a small blue accent bar */
 .prompt-box {
     border-left: 4px solid #2563eb;
 }
 
-/* 6. Inputs & Forms */
 textarea {
     width: 100%;
     height: 250px;
@@ -122,11 +140,9 @@ textarea {
 
 textarea:focus {
     border-color: #2563eb;
-    /* A crisp blue outline when typing */
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-/* 7. Buttons */
 .btn-submit, .btn-download {
     display: block;
     width: 100%;
@@ -155,7 +171,6 @@ textarea:focus {
     cursor: not-allowed;
 }
 
-/* 8. Utility Classes & Results */
 .word-counter {
     text-align: right;
     font-size: 13px;
@@ -167,37 +182,35 @@ textarea:focus {
 .word-counter.error { color: #ef4444; }
 
 #results-box {
-    display: none; /* Keep this for your JS to toggle */
+    display: none; 
     margin-top: 24px;
     padding: 24px;
     background-color: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
-    
-    /* THE FIXES */
     text-align: left !important; 
-    width: 100%; /* Ensures the box takes up the full width available */
-    box-sizing: border-box; /* Prevents padding from breaking the width */
+    width: 100%; 
+    box-sizing: border-box;
 }
 
 #results-box p, 
 #results-box h3, 
 #results-box span {
     text-align: left !important;
-    display: block; /* Ensures they act like full-width rows */
+    display: block;
     margin-left: 0;
     margin-right: auto;
 }
 
 #results-box strong {
     display: inline-block;
-    min-width: 120px; /* Aligns the colons (:) vertically */
+    min-width: 120px; 
 }
 
 .band-score { 
     font-size: 24px; 
     font-weight: 700; 
-    color: #16a34a; /* Crisp green */
+    color: #16a34a; 
     margin-bottom: 12px; 
 }
 
@@ -210,7 +223,6 @@ textarea:focus {
     margin-bottom: 15px;
 }
 
-/* 9. Resource Page File Cards */
 .file-card {
     text-align: left;
     background-color: #ffffff;
@@ -228,7 +240,6 @@ textarea:focus {
     border-color: #cbd5e1;
 }
 
-/* Make the download button on the resource page less heavy */
 .file-card .btn-download {
     width: auto;
     margin-top: 0;
@@ -246,11 +257,11 @@ textarea:focus {
     display: flex;
     align-items: center;
     text-decoration: none;
-    gap: 10px; /* Space between the logo and the text */
+    gap: 10px; 
 }
 
 .nav-logo {
-    height: 40px; /* Adjust this number until it fits perfectly */
+    height: 40px; 
     width: auto;
 }
 
@@ -259,4 +270,90 @@ textarea:focus {
     font-weight: 700;
     font-size: 24px;
     color: #1e293b;
+}
+
+.resource-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px; 
+    margin-top: 25px;
+    width: 100%;
+}
+
+.card {
+    width: 100%;
+    max-width: 100%; 
+    text-align: left; 
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    text-decoration: none;
+    color: #000000;
+    border: 2.5px solid #000000;
+    transition: 0.4s;
+    margin-bottom: 20px;
+}
+
+.card:hover {
+    transform: translateY(-20px);
+    box-shadow: 0 20px 20px rgba(0,0,0,0.1);
+    border-color: #000000; 
+    background-color: #4a9fff;
+    color: #ffffff;
+}
+
+.card i {
+    font-size: 40px;
+    color: #000000;
+    margin-bottom: 15px;
+    display: block; 
+}
+
+.card:hover i {
+    color: #ffffff;
+}
+
+.card:hover p {
+    color: #ffffff;
+}
+
+.hero {
+    display: flex;
+    align-items: center; 
+    justify-content: space-between;
+    gap: 40px;
+    width: 100%; 
+    max-width: 1100px; 
+    margin: 60px auto; 
+    padding: 0 20px;
+}
+
+.hero-content {
+    text-align: left;
+    flex: 1;
+}
+
+.hero-image {
+    flex: 1;
+    text-align: right;
+}
+
+@media (max-width: 768px) {
+    .hero-image {
+        display: block;
+    }
+    .resource-grid {
+        grid-template-columns: 1fr;
+    }
+    .card {
+        max-width: 100%;
+    }
+}
+
+.container {
+    width:100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+    text-align: left; 
 }
