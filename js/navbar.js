@@ -27,13 +27,11 @@ function loadNavbar() {
         placeholder.innerHTML = navbarHTML;
     }
 
-    // Toggle functionality for Mobile
     const menuToggle = document.getElementById('menu-toggle');
     const navLinks = document.getElementById('nav-links');
 
     menuToggle.addEventListener('click', () => {
         navLinks.classList.toggle('active');
-        // Change icon from bars to X when open
         const icon = menuToggle.querySelector('i');
         icon.classList.toggle('fa-bars');
         icon.classList.toggle('fa-times');
