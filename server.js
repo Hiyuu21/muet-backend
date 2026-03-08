@@ -7,20 +7,20 @@ const cors = require('cors');
 const path = require('path');
 const mongoose = require('mongoose'); // NEW: The MongoDB connector
 
-// 1. Tell Cloudinary who you are (Using environment variables for security)
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// 2. Set up the Cloudinary Storage Engine
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: {
-    folder: 'muet-hub-resources', // It will create this folder in your Cloudinary account!
-    resource_type: 'raw', // 🚨 CRITICAL: You MUST use 'raw' for PDFs. If you don't, it thinks it's an image and crashes.
-    allowed_formats: ['pdf', 'doc', 'docx', 'jpg', 'png'] 
+  params: async (req, file) => {
+    return {
+      folder: 'muet-hub-resources', 
+      resource_type: 'raw', 
+      public_id: Date.now() + '-' + file.originalname 
+    };
   },
 });
 
@@ -222,7 +222,6 @@ app.get('/all-quizzes', async (req, res) => {
     }
 });
 
-// --- NEW: Endpoint to fetch ALL General Resources from MongoDB ---
 app.get('/all-resources', async (req, res) => {
     try {
         const resources = await Resource.find().sort({ createdAt: -1 });
@@ -232,7 +231,6 @@ app.get('/all-resources', async (req, res) => {
     }
 });
 
-// --- NEW: Endpoint to fetch the latest Writing Prompt ---
 app.get('/latest-writing', async (req, res) => {
     try {
         const latestWriting = await Writing.findOne().sort({ createdAt: -1 });
