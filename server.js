@@ -16,9 +16,10 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: async (req, file) => {
+    const isAudio = file.mimetype.includes('audio') || file.originalname.toLowerCase().endsWith('.mp3');
     return {
       folder: 'muet-hub-resources', 
-      resource_type: 'raw', 
+      resource_type: isAudio ? 'video' : 'raw',
       public_id: Date.now() + '-' + file.originalname 
     };
   },
