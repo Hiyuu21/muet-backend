@@ -24,6 +24,9 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            /* Mobile responsiveness built-in */
+            flex-wrap: wrap; 
+            gap: 15px;
         }
         .file-name {
             font-weight: 600;
@@ -49,7 +52,7 @@
     <div id="nav-placeholder"></div>
     <script src="js/navbar.js"></script>
 
-   <div class="app-container">
+    <div class="app-container">
         <h1>Past Year Resources</h1>
         <p>Download and review past MUET papers and materials.</p>
 
@@ -58,7 +61,10 @@
         </div>
     </div>
 
-    <script src="js/navbar.js"></script>
+    <footer>
+        <p>&copy; 2026 MUET Hub - Built with ❤️ for MUET Candidates</p>
+    </footer>
+
     <script>
         async function fetchResources() {
             try {
@@ -79,8 +85,8 @@
                     const fileCard = document.createElement('div');
                     fileCard.className = 'file-card';
                     fileCard.innerHTML = `
-                        <span style="font-weight: 500;">📂 ${file.originalName}</span>
-                        <a href="https://muet-hub-api.onrender.com/uploads/${file.fileName}" target="_blank" class="btn-download">View / Download</a>
+                        <span style="font-weight: 500; word-break: break-all;">📂 ${file.originalName}</span>
+                        <a href="${file.fileUrl}" target="_blank" class="btn-download">View / Download</a>
                     `;
                     fileListContainer.appendChild(fileCard);
                 });
@@ -94,10 +100,5 @@
         // Run the fetch function as soon as the page loads
         fetchResources();
     </script>
-    </script>
 </body>
-
-    <footer>
-        <p>&copy; 2026 MUET Hub - Built with ❤️ for MUET Candidates</p>
-    </footer>
 </html>
