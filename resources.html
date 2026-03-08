@@ -24,16 +24,27 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            /* Mobile responsiveness built-in */
             flex-wrap: wrap; 
             gap: 15px;
+            transition: transform 0.2s ease;
+        }
+        /* Subtle hover effect for the cards */
+        .file-card:hover {
+            transform: translateY(-2px);
+            border-color: #2f6cce;
         }
         .file-name {
             font-weight: 600;
             color: #2c3e50;
         }
+        /* Search bar styling */
+        #searchInput:focus {
+            outline: none;
+            border-color: #2f6cce !important;
+            box-shadow: 0 0 8px rgba(39, 174, 96, 0.2);
+        }
         .btn-download {
-            background-color: #27ae60;
+            background-color: #ffffff;
             color: white;
             text-decoration: none;
             padding: 10px 15px;
@@ -43,7 +54,7 @@
             transition: background 0.3s;
         }
         .btn-download:hover {
-            background-color: #2ecc71;
+            background-color: #2f6cce;
         }
     </style>
 </head>
@@ -56,8 +67,14 @@
         <h1>Past Year Resources</h1>
         <p>Download and review past MUET papers and materials.</p>
 
-        <div id="fileList">
-            <em>Loading resources from the cloud...</em>
+        <div class="search-container" style="margin-bottom: 25px;">
+            <input type="text" id="searchInput" placeholder="🔍 Search resources (e.g., Speaking, Writing)..." 
+                autocomplete="off"
+                style="width: 100%; padding: 14px; border-radius: 10px; border: 2px solid #eee; font-family: 'Montserrat'; font-size: 16px; transition: all 0.3s;">
+        </div>
+
+        <div id="fileList" class="file-list">
+            <p style="text-align: center; color: #7f8c8d;"><em>Fetching latest papers...</em></p>
         </div>
     </div>
 
@@ -66,38 +83,64 @@
     </footer>
 
     <script>
+        let allFiles = []; 
+
         async function fetchResources() {
+            const fileListContainer = document.getElementById('fileList');
             try {
-                // Fetch from the new MongoDB endpoint!
                 const response = await fetch('https://muet-hub-api.onrender.com/all-resources');
-                const files = await response.json();
+                if (!response.ok) throw new Error('Network response was not ok');
                 
-                const fileListContainer = document.getElementById('fileList');
-                fileListContainer.innerHTML = ''; // Clear loading text
-
-                if (files.length === 0) {
-                    fileListContainer.innerHTML = '<p style="text-align:center;">No resources uploaded yet!</p>';
-                    return;
-                }
-
-                // Loop through the database and draw a card for each file
-                files.forEach(file => {
-                    const fileCard = document.createElement('div');
-                    fileCard.className = 'file-card';
-                    fileCard.innerHTML = `
-                        <span style="font-weight: 500; word-break: break-all;">📂 ${file.originalName}</span>
-                        <a href="${file.fileUrl}" target="_blank" class="btn-download">View / Download</a>
-                    `;
-                    fileListContainer.appendChild(fileCard);
-                });
+                allFiles = await response.json(); 
+                renderFiles(allFiles);
 
             } catch (error) {
-                console.error('Error fetching files:', error);
-                document.getElementById('fileList').innerHTML = '<p style="color:red;">Failed to load resources.</p>';
+                console.error('Error:', error);
+                fileListContainer.innerHTML = `
+                    <div style="text-align:center; padding: 20px; color: #e74c3c;">
+                        <i class="fas fa-exclamation-circle fa-2x"></i>
+                        <p>Oops! Failed to load resources. Please try refreshing.</p>
+                    </div>`;
             }
         }
 
-        // Run the fetch function as soon as the page loads
+        function renderFiles(filesToDisplay) {
+            const fileListContainer = document.getElementById('fileList');
+            fileListContainer.innerHTML = ''; 
+
+            if (filesToDisplay.length === 0) {
+                fileListContainer.innerHTML = `
+                    <p style="text-align:center; color: #95a5a6; margin-top: 30px;">
+                        <i class="fas fa-search"></i> No matching resources found!
+                    </p>`;
+                return;
+            }
+
+            filesToDisplay.forEach(file => {
+                const fileCard = document.createElement('div');
+                fileCard.className = 'file-card';
+                fileCard.innerHTML = `
+                    <span style="font-weight: 500; word-break: break-all; color: #34495e;">
+                        <i class="far fa-file-pdf" style="color: #e74c3c; margin-right: 8px;"></i> ${file.originalName}
+                    </span>
+                    <a href="${file.fileUrl}" target="_blank" class="btn-download">
+                        <i class="fas fa-download"></i> View / Download
+                    </a>
+                `;
+                fileListContainer.appendChild(fileCard);
+            });
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase().trim();
+            
+            const filtered = allFiles.filter(file => 
+                file.originalName.toLowerCase().includes(term)
+            );
+            
+            renderFiles(filtered);
+        });
+
         fetchResources();
     </script>
 </body>
