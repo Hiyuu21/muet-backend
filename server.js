@@ -1,10 +1,28 @@
 require('dotenv').config();
 const express = require('express');
-const multer  = require('multer');
+const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs');
 const mongoose = require('mongoose'); // NEW: The MongoDB connector
+
+// 1. Tell Cloudinary who you are (Using environment variables for security)
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// 2. Set up the Cloudinary Storage Engine
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'muet-hub-resources', // It will create this folder in your Cloudinary account!
+    resource_type: 'raw', // 🚨 CRITICAL: You MUST use 'raw' for PDFs. If you don't, it thinks it's an image and crashes.
+    allowed_formats: ['pdf', 'doc', 'docx', 'jpg', 'png'] 
+  },
+});
 
 const app = express();
 const PORT = 3000;
@@ -23,16 +41,12 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }));app.use(express.json()); 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// --- NEW: Connect to MongoDB and Define the Schema ---
 mongoose.connect(MONGO_URI)
     .then(() => console.log('Connected to MongoDB Cloud!'))
     .catch(err => console.error('MongoDB connection error:', err));
 
-// Tell MongoDB what our Quiz data looks like
 
-// --- 1. Define All Three Database Schemas ---
 const quizSchema = new mongoose.Schema({
     passage: String,
     questions: Array,
@@ -49,24 +63,10 @@ const Writing = mongoose.model('Writing', writingSchema);
 const resourceSchema = new mongoose.Schema({
     fileName: String,
     originalName: String,
+    fileUrl: String,
     createdAt: { type: Date, default: Date.now }
 });
 const Resource = mongoose.model('Resource', resourceSchema);
-
-const uploadDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// --- Multer Storage Setup (You need this back!) ---
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) { 
-        cb(null, 'uploads/') 
-    },
-    filename: function (req, file, cb) { 
-        cb(null, Date.now() + '-' + file.originalname) 
-    }
-});
 
 // Update your upload definition to handle > 100MB
 const upload = multer({ 
@@ -74,15 +74,12 @@ const upload = multer({
     limits: { fileSize: 200 * 1024 * 1024 } // 200MB Limit
 });
 
-// --- FIXED Traffic Controller Endpoint ---
-// --- HEAVY DUTY Traffic Controller Endpoint ---
+
 app.post('/upload', (req, res) => {
-    // 1. Listen for the browser "giving up"
     req.on('aborted', () => {
         console.error('!! The browser closed the connection before upload finished !!');
     });
 
-    // 2. Manually trigger the upload process
     upload.single('resourceFile')(req, res, async (err) => {
         if (err) {
             console.error("Multer Error:", err);
@@ -93,36 +90,41 @@ app.post('/upload', (req, res) => {
             if (!req.file) return res.status(400).send('No file uploaded.');
 
             const fileType = req.body.fileType; 
-            console.log(`1. Received: ${req.file.originalname} (${(req.file.size / 1024 / 1024).toFixed(2)} MB). Type: ${fileType}`);
+            // req.file.path is now the permanent Cloudinary URL!
+            const cloudUrl = req.file.path; 
+            
+            console.log(`1. Uploaded to Cloudinary! URL: ${cloudUrl}`);
 
-            // SCENARIO A: Audio / General (The 100MB+ files)
+            // SCENARIO A: Audio / General Files
             const isAudio = req.file.mimetype.includes('audio') || req.file.originalname.toLowerCase().endsWith('.mp3');
             
             if (fileType === 'general' || isAudio) {
                 const newResource = new Resource({
                     fileName: req.file.filename,
-                    originalName: req.file.originalname
+                    originalName: req.file.originalname,
+                    fileUrl: cloudUrl // Save the live URL to the database
                 });
                 
                 await newResource.save();
                 console.log("Database entry created. Success!");
-                return res.status(200).json({ message: 'Upload successful! File saved to library.' });
+                return res.status(200).json({ message: 'Upload successful! File saved to library.', resource: newResource });
             }
 
-            // SCENARIO B & C: PDF Processing (Must be < 20MB for Gemini API)
-            const pdfPath = path.join(__dirname, 'uploads', req.file.filename);
-            const base64Pdf = fs.readFileSync(pdfPath).toString('base64');
+            // SCENARIO B & C: PDF Processing for Gemini
+            console.log("2. Fetching PDF from Cloudinary for Gemini OCR...");
+            
+            // Because the file is in the cloud, we fetch it via URL to convert to Base64
+            const pdfResponse = await fetch(cloudUrl);
+            const pdfBuffer = await pdfResponse.arrayBuffer();
+            const base64Pdf = Buffer.from(pdfBuffer).toString('base64');
             
             let systemPrompt = "";
             if (fileType === 'reading') {
                 systemPrompt = `
                     You are an expert OCR and data extraction tool. Extract the MUET Reading passages and questions from this PDF.
-                    
                     CRITICAL INSTRUCTION TO AVOID RECITATION FILTERS: 
                     Do NOT output the passage text as one continuous copied block. You MUST insert a HTML <br> tag after every single sentence in the passage to break up the string matching. 
-                    
                     The multiple-choice questions and options MUST be extracted exactly as they appear.
-                    
                     Return ONLY a JSON ARRAY containing an object for each passage, in this exact format:
                     [
                     {
@@ -142,9 +144,8 @@ app.post('/upload', (req, res) => {
                 `;
             }
 
-            console.log(`2. Sending PDF to AI for OCR extraction...`);
+            console.log(`3. Sending PDF to Gemini...`);
         
-            // FIX: We are back on the working 2.5-flash model!
             const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -157,7 +158,7 @@ app.post('/upload', (req, res) => {
                     }],
                     generationConfig: { 
                         responseMimeType: "application/json",
-                        temperature: 0.2 // Slightly higher so it feels comfortable adding the <br> tags
+                        temperature: 0.2
                     },
                     safetySettings: [
                         { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
@@ -170,7 +171,6 @@ app.post('/upload', (req, res) => {
 
             const data = await aiResponse.json();
             
-            // FIX 2: Check if the AI actually gave us the 'parts' before trying to read them
             if (!data.candidates || !data.candidates[0].content || !data.candidates[0].content.parts) {
                 console.error("AI blocked the PDF extraction! Full response:", JSON.stringify(data, null, 2));
                 return res.status(500).json({ message: "AI refused to process the PDF. Check the terminal for the exact reason." });
@@ -180,13 +180,13 @@ app.post('/upload', (req, res) => {
             
             if (fileType === 'reading') {
                 await Quiz.insertMany(generatedJSON);
-                console.log("Done update: Reading")
+                console.log("Done update: Reading");
             } else if (fileType === 'writing') {
                 await Writing.insertMany(generatedJSON);
-                console.log("Done update: Writing")
+                console.log("Done update: Writing");
             }
 
-            res.json({ message: `${fileType.toUpperCase()} processed and saved!`, fileName: req.file.filename });
+            res.json({ message: `${fileType.toUpperCase()} processed and saved!`, fileUrl: cloudUrl });
 
         } catch (error) {
             console.error("Detailed Server Error:", error);
@@ -195,7 +195,6 @@ app.post('/upload', (req, res) => {
     });
 });
 
-// --- NEW: Endpoint to fetch the latest quiz from the database ---
 app.get('/latest-quiz', async (req, res) => {
     try {
         // Find the most recently created quiz in the database
@@ -208,7 +207,6 @@ app.get('/latest-quiz', async (req, res) => {
     }
 });
 
-// --- NEW: Endpoint to fetch ALL quizzes ---
 app.get('/all-quizzes', async (req, res) => {
     try {
         // .find() with no filter grabs everything. We sort by newest first.
@@ -296,33 +294,6 @@ app.post('/grade-writing', async (req, res) => {
     } catch (error) {
         console.error("Grading Error:", error);
         res.status(500).json({ error: "Server failed to communicate with AI." });
-    }
-});
-
-// --- NEW: Sync Folder with Database (Avoids Upload Errors) ---
-app.post('/sync-resources', async (req, res) => {
-    try {
-        const uploadsDir = path.join(__dirname, 'uploads');
-        const files = fs.readdirSync(uploadsDir);
-        
-        let addedCount = 0;
-        for (const file of files) {
-            // Check if this file is already in our Database
-            const exists = await Resource.findOne({ fileName: file });
-            
-            if (!exists) {
-                const newRes = new Resource({
-                    fileName: file,
-                    originalName: file.split('-').slice(1).join('-') || file // Attempt to recover name
-                });
-                await newRes.save();
-                addedCount++;
-            }
-        }
-        res.json({ message: `Sync complete! Found ${addedCount} new files.` });
-    } catch (error) {
-        console.error("Sync Error:", error);
-        res.status(500).send("Failed to sync folder.");
     }
 });
 

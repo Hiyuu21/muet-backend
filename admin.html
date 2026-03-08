@@ -55,24 +55,6 @@
             <p id="uploadStatus" style="margin-top: 15px; font-weight: 600; font-size: 14px;"></p>
             <p id="uploadStatus" style="margin-top: 15px; font-weight: 600;"></p>
         </div>
-            <button onclick="syncFiles()" style="font-family: 'Montserrat', sans-serif; background-color: #000000; color: white; padding: 10px; border-radius: 10px;">
-                🔄 Sync Folder (Use for files > 100MB)
-            </button>
-
-            <script>
-            async function syncFiles() {
-                const status = document.getElementById('uploadStatus');
-                status.innerText = "Scanning uploads folder...";
-                
-                const response = await fetch('https://muet-hub-api.onrender.com/sync-resources', { method: 'POST' });
-                const result = await response.json();
-                
-                status.innerText = result.message;
-                status.style.color = "#16a34a";
-                // Optional: Refresh your list if you have a loadResources() function
-                if(typeof loadResources === "function") loadResources();
-            }
-            </script>
     </div>
 
     <script>
