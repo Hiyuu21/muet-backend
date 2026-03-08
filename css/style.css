@@ -338,22 +338,52 @@ textarea:focus {
     text-align: right;
 }
 
-@media (max-width: 768px) {
-    .hero-image {
-        display: block;
-    }
-    .resource-grid {
-        grid-template-columns: 1fr;
-    }
-    .card {
-        max-width: 100%;
-    }
-}
-
 .container {
     width:100%;
     max-width: 1100px;
     margin: 0 auto;
     padding: 0 20px;
     text-align: left; 
+}
+
+/* 1. Hide the Toggle button on Desktop */
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #2f6cce;
+}
+
+/* 2. Mobile Responsive Rules */
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: block; /* Show the hamburger on mobile */
+    }
+
+    .nav-links {
+        display: none; /* Hide links by default on mobile */
+        flex-direction: column;
+        position: absolute;
+        top: 70px; /* Sits right below the navbar */
+        left: 0;
+        width: 100%;
+        background: white;
+        padding: 20px;
+        border-bottom: 1px solid #e2e8f0;
+        box-shadow: 0 10px 15px rgba(0,0,0,0.05);
+        z-index: 1000;
+        gap: 10px;
+    }
+
+    .nav-links.active {
+        display: flex;
+    }
+
+    .navbar a {
+        width: 100%;
+        text-align: left;
+        padding: 12px;
+    }
 }
