@@ -5,7 +5,7 @@ const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cors = require('cors');
 const path = require('path');
-const mongoose = require('mongoose'); // NEW: The MongoDB connector
+const mongoose = require('mongoose');
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -33,6 +33,7 @@ dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY; 
 const MONGO_URI = process.env.MONGO_URI;
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
 app.use(cors({
     origin: [
@@ -69,7 +70,6 @@ const resourceSchema = new mongoose.Schema({
 });
 const Resource = mongoose.model('Resource', resourceSchema);
 
-// Update your upload definition to handle > 100MB
 const upload = multer({ 
     storage: storage,
     limits: { fileSize: 200 * 1024 * 1024 } // 200MB Limit
@@ -256,38 +256,49 @@ app.post('/grade-writing', async (req, res) => {
     try {
         const { answer, taskType, prompt } = req.body;
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+                // OpenRouter recommends providing your site URL and title for rankings
+                'HTTP-Referer': 'https://tubular-unicorn-b6a4fe.netlify.app', 
+                'X-Title': 'MUET Hub'
+            },
             body: JSON.stringify({
-                contents: [{ 
-                    parts: [{ text: `Grade this MUET ${taskType}. Prompt: ${prompt}. Student Answer: ${answer}. Return JSON with keys: band, strengths, improvements, suggestion.` }] 
-                }],
-                generationConfig: { responseMimeType: "application/json" },
-                // Safety Settings: This prevents the AI from blocking school essays
-                safetySettings: [
-                    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                    { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-                ]
+                model: "openrouter/free",
+                // OpenRouter uses the standard "messages" array instead of "contents"
+                messages: [
+                    {
+                        role: "system",
+                        content: "You are an expert MUET examiner. Grade the essay and return ONLY a valid JSON object with the exact keys: band, strengths, improvements, suggestion."
+                    },
+                    {
+                        role: "user",
+                        content: `Grade this MUET ${taskType}. Prompt: ${prompt}. Student Answer: ${answer}.`
+                    }
+                ],
+                // Forces the model to return proper JSON formatting
+                response_format: { type: "json_object" } 
             })
         });
 
         const data = await response.json();
 
         // --- PREVENT THE CRASH ---
-        if (!data.candidates || data.candidates.length === 0) {
-            console.log("AI blocked the request. Full response:", JSON.stringify(data, null, 2));
+        // OpenRouter's error format is slightly different than Gemini's
+        if (!data.choices || data.choices.length === 0 || data.error) {
+            console.log("OpenRouter blocked/failed the request. Full response:", JSON.stringify(data, null, 2));
             return res.status(500).json({ 
                 band: "N/A", 
-                strengths: "The AI refused to grade this content.", 
-                improvements: "Ensure your essay is appropriate.", 
-                suggestion: "Check your console for the Safety Rating." 
+                strengths: "The AI refused or failed to grade this content.", 
+                improvements: "Ensure your essay is appropriate or try again later.", 
+                suggestion: data.error?.message || "Check your console for the error details." 
             });
         }
 
-        const rawText = data.candidates[0].content.parts[0].text;
+        // OpenRouter parses text from choices[0].message.content instead of candidates[0]...
+        const rawText = data.choices[0].message.content;
         res.json(JSON.parse(rawText));
 
     } catch (error) {
