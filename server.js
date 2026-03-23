@@ -298,7 +298,11 @@ app.post('/grade-writing', async (req, res) => {
         }
 
         // OpenRouter parses text from choices[0].message.content instead of candidates[0]...
-        const rawText = data.choices[0].message.content;
+        let rawText = data.choices[0].message.content;
+        
+        // NEW: Strip out markdown formatting if the AI includes it
+        rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+
         res.json(JSON.parse(rawText));
 
     } catch (error) {
