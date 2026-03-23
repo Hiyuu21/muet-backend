@@ -261,24 +261,25 @@ app.post('/grade-writing', async (req, res) => {
             headers: { 
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-                // OpenRouter recommends providing your site URL and title for rankings
                 'HTTP-Referer': 'https://tubular-unicorn-b6a4fe.netlify.app', 
                 'X-Title': 'MUET Hub'
             },
             body: JSON.stringify({
                 model: "openrouter/free",
-                // OpenRouter uses the standard "messages" array instead of "contents"
                 messages: [
                     {
                         role: "system",
-                        content: "You are an expert MUET examiner. Grade the essay and return ONLY a valid JSON object with the exact keys: band, strengths, improvements, suggestion."
+                        // NEW: Explicitly defining the MUET scale and rules
+                        content: `You are an expert examiner for the Malaysian University English Test (MUET). 
+                        You MUST grade the essay strictly using the MUET grading scale, which ranges from Band 1.0 to Band 5.0+ (e.g., 2.5, 3.0, 4.5, 5.0+). 
+                        Do NOT use IELTS bands (1-9) or any other scale. 
+                        Return ONLY a valid JSON object with the exact keys: band, strengths, improvements, suggestion.`
                     },
                     {
                         role: "user",
                         content: `Grade this MUET ${taskType}. Prompt: ${prompt}. Student Answer: ${answer}.`
                     }
                 ],
-                // Forces the model to return proper JSON formatting
                 response_format: { type: "json_object" } 
             })
         });
@@ -286,7 +287,6 @@ app.post('/grade-writing', async (req, res) => {
         const data = await response.json();
 
         // --- PREVENT THE CRASH ---
-        // OpenRouter's error format is slightly different than Gemini's
         if (!data.choices || data.choices.length === 0 || data.error) {
             console.log("OpenRouter blocked/failed the request. Full response:", JSON.stringify(data, null, 2));
             return res.status(500).json({ 
@@ -297,10 +297,9 @@ app.post('/grade-writing', async (req, res) => {
             });
         }
 
-        // OpenRouter parses text from choices[0].message.content instead of candidates[0]...
         let rawText = data.choices[0].message.content;
         
-        // NEW: Strip out markdown formatting if the AI includes it
+        // Strip out markdown formatting if the AI includes it
         rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
 
         res.json(JSON.parse(rawText));
