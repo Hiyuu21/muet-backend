@@ -47,20 +47,34 @@ async function gradeEssay() {
             })
         });
 
+        // We save the response to 'result'
         const result = await response.json();
-        resultsBox.style.display = 'block';
+        
+        // 1. Display and Style the Band
         const bandValue = result.band || "N/A";
         const bandDisplay = document.getElementById('bandDisplay');
-
         bandDisplay.innerText = `Estimated Grade: ${bandValue}`;
         bandDisplay.style.fontSize = "22px";
         bandDisplay.style.fontWeight = "700";
-        bandDisplay.style.color = "#16a34a"; // A nice deep MUET blue
+        bandDisplay.style.color = "#16a34a"; // Keeps your nice green/blue color
 
-        // Match the JSON keys exactly
-        document.getElementById('strengthsDisplay').innerText = result.strengths || "No data";
-        document.getElementById('weaknessesDisplay').innerText = result.improvements || "No data";
-        document.getElementById('vocabDisplay').innerText = result.suggestion || "No data";
+        // 2. Helper function to turn arrays into HTML bullet points
+        const formatList = (items) => {
+            // Adds a fallback just in case the AI fails to send an array
+            if (!items) return `<li>No data provided</li>`;
+            if (!Array.isArray(items)) return `<li>${items}</li>`; 
+            return items.map(item => `<li style="margin-bottom: 8px;">${item}</li>`).join('');
+        };
+
+        // 3. Inject the HTML into the lists (using 'result' instead of 'data')
+        document.getElementById('strengthsDisplay').innerHTML = formatList(result.strengths);
+        document.getElementById('weaknessesDisplay').innerHTML = formatList(result.improvements);
+
+        // 4. Inject the string for the suggestion
+        document.getElementById('vocabDisplay').innerText = result.suggestion || "No overall suggestion.";
+
+        // Make sure the results box is visible
+        resultsBox.style.display = 'block';
         
         // Scroll to results
         resultsBox.scrollIntoView({ behavior: 'smooth' });

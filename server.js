@@ -269,11 +269,13 @@ app.post('/grade-writing', async (req, res) => {
                 messages: [
                     {
                         role: "system",
-                        // NEW: Explicitly defining the MUET scale and rules
                         content: `You are an expert examiner for the Malaysian University English Test (MUET). 
-                        You MUST grade the essay strictly using the MUET grading scale, which ranges from Band 1.0 to Band 5.0+ (e.g., 2.5, 3.0, 4.5, 5.0+). 
-                        Do NOT use IELTS bands (1-9) or any other scale. 
-                        Return ONLY a valid JSON object with the exact keys: band, strengths, improvements, suggestion.`
+                        You MUST grade the essay strictly using the MUET grading scale (Band 1.0 to Band 5.0+). Do NOT use IELTS bands (1-9). 
+                        Return ONLY a valid JSON object with these exact keys and data types:
+                        - "band": string (e.g., "Band 4.0")
+                        - "strengths": array of strings (3 bullet points)
+                        - "improvements": array of strings (3 bullet points)
+                        - "suggestion": string (a short overall summary)`
                     },
                     {
                         role: "user",
